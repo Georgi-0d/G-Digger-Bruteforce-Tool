@@ -49,9 +49,9 @@ python3 g-digger.py -d https://google.com -w wordlist.txt
 
 ## Command-Line Options:
 
-- ```bash-s, --subdomain```: Run subdomain brute-forcing on the specified domain.
-- ```bash-d, --directory```: Run subdirectory brute-forcing on the specified base URL.
-- ```bash-w, --wordlist``` : Path to the wordlist file for brute-forcing.
+- ```-s, --subdomain```: Run subdomain brute-forcing on the specified domain.
+- ```-d, --directory```: Run subdirectory brute-forcing on the specified base URL.
+- ```-w, --wordlist``` : Path to the wordlist file for brute-forcing.
 
 ## Note
 
