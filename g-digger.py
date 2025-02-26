@@ -69,11 +69,23 @@ async def check_subdirectory(url, subdirectory):
         try:
             async with session.get(full_url) as response:
                 if response.status == 200:
-                    print(f"{Fore.GREEN}[+] Found: {full_url}")
+                    print(f"{Fore.GREEN}[+] Found (200 OK): {full_url}")
+                elif response.status == 302:
+                    print(f"{Fore.YELLOW}[+] Redirected (302 Found): {full_url}")
         except Exception as e:
-            pass
+            print(f"{Fore.RED}[-] Error with {full_url}: {e}")
 
-async def brute_force_directories(base_url, wordlist_path):
+def run_in_thread(url, subdirectory):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        loop.run_until_complete(check_subdirectory(url, subdirectory))
+    except Exception as e:
+        print(f"Error in thread: {e}")
+    finally:
+        loop.close()
+
+async def brute_force_directories(base_url, wordlist_path, threads=100):
     try:
         with open(wordlist_path, "r") as file:
             subdirectories = file.read().splitlines()
@@ -81,15 +93,18 @@ async def brute_force_directories(base_url, wordlist_path):
         print(f"{Fore.RED}Error: Wordlist file '{wordlist_path}' not found.")
         return
 
+    loop = asyncio.get_event_loop()
     tasks = []
-    for subdirectory in subdirectories:
-        task = check_subdirectory(base_url, subdirectory)
-        tasks.append(task)
 
-    for i in range(0, len(tasks), 10):
-        chunk = tasks[i:i + 10]
-        await asyncio.gather(*chunk)
-        await asyncio.sleep(0.1)
+    with ThreadPoolExecutor(max_workers=threads) as executor:
+        for subdirectory in subdirectories:
+            task = loop.run_in_executor(executor, run_in_thread, base_url, subdirectory)
+            tasks.append(task)
+
+        await asyncio.gather(*tasks)
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 def main():
     parser = argparse.ArgumentParser(
@@ -120,7 +135,7 @@ def main():
             asyncio.run(brute_force_subdomains(args.subdomain, args.wordlist, threads=50))
         elif args.directory:
             print(f"{Fore.YELLOW}[*] Starting subdirectory bruteforce for {args.directory}...")
-            asyncio.run(brute_force_directories(args.directory, args.wordlist))
+            asyncio.run(brute_force_directories(args.directory, args.wordlist,threads=50))
         else:
             print(f"{Fore.RED}[*] Please specify a mode. Use --help for usage instructions.")
 
