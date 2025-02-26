@@ -2,6 +2,15 @@
 
 A powerful tool for brute-forcing subdomains and subdirectories of a given domain or website. This tool helps security researchers and penetration testers identify hidden subdomains and directories that may not be publicly listed.
 
+```bash
+   _____            _____ _____ _____  _____ ______ _____
+  / ____|          |  __ \_   _/ ____|/ ____|  ____|  __ \
+ | |  __   ______  | |  | || || |  __| |  __| |__  | |__) |
+ | | |_ | |______| | |  | || || | |_ | | |_ |  __| |  _  /
+ | |__| |          | |__| || || |__| | |__| | |____| | \ \
+  \_____|          |_____/_____\_____|\_____|______|_|  \_\
+```
+
 ## Features
 
 - **Subdomain Bruteforce**: Discover subdomains of a given domain using a wordlist.
