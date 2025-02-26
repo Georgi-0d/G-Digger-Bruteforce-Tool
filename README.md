@@ -55,13 +55,7 @@ python3 g-digger.py -d https://google.com -w wordlist.txt
 
 ## Note
 
-### Key Points:
-1. **Installation**: Explains how to clone the repo and install dependencies.
-2. **Usage**: Details on how to run the tool in subdomain and subdirectory brute-forcing modes.
-3. **Command-Line Options**: A breakdown of the available options for the user.
-4. **Example**: Simple usage examples for both modes.
-5. **Error Handling**: Basic error-handling explanation for interruptions and incorrect file handling.
-6. **License**: Mentions the MIT license for open-source projects. You can change it based on your own preference.
+####**This tool is intended for educational and ethical security testing purposes only. Always have proper authorization before performing penetration testing on any network or website.**
 
 ## Author
 
