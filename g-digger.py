@@ -5,7 +5,7 @@ import dns.asyncresolver
 from colorama import Fore, init
 import argparse
 from argparse import RawTextHelpFormatter
-
+import time
 init(autoreset=True)
 
 print(Fore.RED + r"""   
@@ -34,7 +34,7 @@ async def check_subdomain(domain, subdomain):
         answers = await resolver.resolve(full_domain, "A")
         ips = [ip.to_text() for ip in answers]
         print(f"{Fore.GREEN}[+] Found: {full_domain} -> {', '.join(ips)} (IPv4)")
-    except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.exception.Timeout):
+    except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.exception.Timeout,dns.resolver.YXDOMAIN):
         pass
     except Exception as e:
         print(f"{Fore.RED}[!] Error resolving {full_domain}: {e}")
@@ -108,6 +108,7 @@ def main():
     args = parser.parse_args()
 
     try:
+        start_time=time.time()
         if args.subdomain:
             print(f"{Fore.YELLOW}[*] Starting subdomain bruteforce for {args.subdomain}...")
             asyncio.run(brute_force_subdomains(args.subdomain, args.wordlist))
@@ -116,6 +117,11 @@ def main():
             asyncio.run(brute_force_directories(args.directory, args.wordlist))
         else:
             print(f"{Fore.RED}[*] Please specify a mode. Use --help for usage instructions.")
+
+        end_time=time.time()
+        elapsed_time=end_time-start_time
+        print("")
+        print(f"{Fore.GREEN}[*] Time taken: {elapsed_time:.3f} seconds")
     except KeyboardInterrupt:
         print(f"\n{Fore.RED}[*] Operation canceled by user.")
         sys.exit(0)
