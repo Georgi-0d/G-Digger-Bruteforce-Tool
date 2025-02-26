@@ -6,6 +6,8 @@ from colorama import Fore, init
 import argparse
 from argparse import RawTextHelpFormatter
 import time
+from concurrent.futures import ThreadPoolExecutor
+
 init(autoreset=True)
 
 print(Fore.RED + r"""   
@@ -34,10 +36,16 @@ async def check_subdomain(domain, subdomain):
         answers = await resolver.resolve(full_domain, "A")
         ips = [ip.to_text() for ip in answers]
         print(f"{Fore.GREEN}[+] Found: {full_domain} -> {', '.join(ips)} (IPv4)")
-    except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.exception.Timeout,dns.resolver.YXDOMAIN):
+    except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.exception.Timeout, dns.resolver.YXDOMAIN):
         pass
     except Exception as e:
         print(f"{Fore.RED}[!] Error resolving {full_domain}: {e}")
+
+# Using ThreadPoolExecutor to handle subdomain lookups in threads
+def check_subdomain_thread(domain, subdomain):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(check_subdomain(domain, subdomain))
 
 async def brute_force_subdomains(domain, wordlist_path, threads=100):
     try:
@@ -47,15 +55,16 @@ async def brute_force_subdomains(domain, wordlist_path, threads=100):
         print(f"{Fore.RED}Error: Wordlist file '{wordlist_path}' not found.")
         return
 
-    tasks = []
-    for subdomain in subdomains:
-        task = check_subdomain(domain, subdomain)
-        tasks.append(task)
+    # Use ThreadPoolExecutor for subdomain lookup
+    with ThreadPoolExecutor(max_workers=threads) as executor:
+        tasks = []
+        for subdomain in subdomains:
+            task = executor.submit(check_subdomain_thread, domain, subdomain)
+            tasks.append(task)
 
-    for i in range(0, len(tasks), 10):
-        chunk = tasks[i:i + 10]
-        await asyncio.gather(*chunk)
-        await asyncio.sleep(0.1)
+        # Wait for all threads to complete
+        for task in tasks:
+            task.result()
 
 async def check_subdirectory(url, subdirectory):
     full_url = f"{url}/{subdirectory}"
@@ -108,18 +117,18 @@ def main():
     args = parser.parse_args()
 
     try:
-        start_time=time.time()
+        start_time = time.time()
         if args.subdomain:
             print(f"{Fore.YELLOW}[*] Starting subdomain bruteforce for {args.subdomain}...")
-            asyncio.run(brute_force_subdomains(args.subdomain, args.wordlist))
+            asyncio.run(brute_force_subdomains(args.subdomain, args.wordlist, threads=50))
         elif args.directory:
             print(f"{Fore.YELLOW}[*] Starting subdirectory bruteforce for {args.directory}...")
             asyncio.run(brute_force_directories(args.directory, args.wordlist))
         else:
             print(f"{Fore.RED}[*] Please specify a mode. Use --help for usage instructions.")
 
-        end_time=time.time()
-        elapsed_time=end_time-start_time
+        end_time = time.time()
+        elapsed_time = end_time - start_time
         print("")
         print(f"{Fore.GREEN}[*] Time taken: {elapsed_time:.3f} seconds")
     except KeyboardInterrupt:
