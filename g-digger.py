@@ -41,7 +41,6 @@ async def check_subdomain(domain, subdomain):
     except Exception as e:
         print(f"{Fore.RED}[!] Error resolving {full_domain}: {e}")
 
-# Using ThreadPoolExecutor to handle subdomain lookups in threads
 def check_subdomain_thread(domain, subdomain):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -55,14 +54,12 @@ async def brute_force_subdomains(domain, wordlist_path, threads=100):
         print(f"{Fore.RED}Error: Wordlist file '{wordlist_path}' not found.")
         return
 
-    # Use ThreadPoolExecutor for subdomain lookup
     with ThreadPoolExecutor(max_workers=threads) as executor:
         tasks = []
         for subdomain in subdomains:
             task = executor.submit(check_subdomain_thread, domain, subdomain)
             tasks.append(task)
 
-        # Wait for all threads to complete
         for task in tasks:
             task.result()
 
