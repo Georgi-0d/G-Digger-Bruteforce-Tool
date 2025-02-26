@@ -55,7 +55,7 @@ python3 g-digger.py -d https://google.com -w wordlist.txt
 
 ## Note
 
-####**This tool is intended for educational and ethical security testing purposes only. Always have proper authorization before performing penetration testing on any network or website.**
+**This tool is intended for educational and ethical security testing purposes only. Always have proper authorization before performing penetration testing on any network or website.**
 
 ## Author
 
